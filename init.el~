@@ -1,0 +1,204 @@
+;;
+;;
+
+(load-theme 'catppuccin :no-confirm)
+(setq catppuccin-flavor 'mocha) ;; or 'latte, 'macchiato, or 'mocha
+(catppuccin-reload)
+
+ (setq-default line-spacing 1)
+
+(require 'icalendar)
+(setq org-icalendar-use-scheduled '(event-if-todo event-if-not-todo))
+(setq org-icalendar-use-deadline '(event-if-todo event-if-not-todo))
+
+(find-file "~/iCloudDrive/iCloud~com~appsonthemove~beorg/org")
+
+(tool-bar-mode -1)
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+
+(setq inhibit-startup-message t)
+
+;; Make ESC quit prompts
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
+(scroll-bar-mode -1)        ; Disable visible scrollbar
+
+(global-visual-line-mode 1)
+
+;; Initialize package sources
+(require 'package)
+
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("org" . "https://orgmode.org/elpa/")
+                         ("elpa" . "https://elpa.gnu.org/packages/")))
+
+(package-initialize)
+(unless package-archive-contents
+  (package-refresh-contents))
+
+(require 'use-package)
+(setq use-package-always-ensure t)
+
+(use-package emacsql)
+
+
+(use-package ivy
+  :ensure t
+  :bind (("C-s" . swiper)
+         :map ivy-minibuffer-map
+         ("TAB" . ivy-alt-done)	
+         ("C-l" . ivy-alt-done)
+         ("C-j" . ivy-next-line)
+         ("C-k" . ivy-previous-line)
+         :map ivy-switch-buffer-map
+         ("C-k" . ivy-previous-line)
+         ("C-l" . ivy-done)
+         ("C-d" . ivy-switch-buffer-kill)
+         :map ivy-reverse-i-search-map
+         ("C-k" . ivy-previous-line)
+         ("C-d" . ivy-reverse-i-search-kill))
+  :init
+  (ivy-mode 1)) 
+
+
+(use-package org
+  :config
+  (setq org-agenda-files
+	'("~/iCloudDrive/iCloud~com~appsonthemove~beorg/org/TASKS.org" "~/iCloudDrive/iCloud~com~appsonthemove~beorg/org/HOME.org" "~/iCloudDrive/iCloud~com~appsonthemove~beorg/org/RACC.org" "~/iCloudDrive/iCloud~com~appsonthemove~beorg/org/Birthdays.org" "~/iCloudDrive/iCloud~com~appsonthemove~beorg/org/archive.org" "~/iCloudDrive/iCloud~com~appsonthemove~beorg/org/Journal.org")))
+
+  (setq org-refile-targets
+
+    '(("archive.org" :maxlevel . 1)
+      ("TASKS.org" :maxlevel . 1)))
+
+  ;; Save Org buffers after refiling!
+(advice-add 'org-refile :after 'org-save-all-org-buffers)
+
+
+;; Install org-present if needed
+(unless (package-installed-p 'org-present)
+  (package-install 'org-present))
+
+;; Install visual-fill-column
+(unless (package-installed-p 'visual-fill-column)
+  (package-install 'visual-fill-column))
+
+;; Configure fill width
+(setq visual-fill-column-width 110
+      visual-fill-column-center-text t)
+
+(defun my/org-present-start ()
+  ;; Center the presentation and wrap lines
+  (visual-fill-column-mode 1)
+  (visual-line-mode 1))
+
+(defun my/org-present-end ()
+  ;; Stop centering the document
+  (visual-fill-column-mode 0)
+  (visual-line-mode 0))
+
+;; Register hooks with org-present
+(add-hook 'org-present-mode-hook 'my/org-present-start)
+(add-hook 'org-present-mode-quit-hook 'my/org-present-end)
+
+(setq org-capture-templates
+    `(("t" "Tasks / Projects")
+      ("tt" "Task" entry (file+olp "~/iCloudDrive/iCloud~com~appsonthemove~beorg/org/TASKS.org" "Inbox")
+           "* TODO %?\n" :empty-lines 1)
+
+      ("j" "Journal Entries")
+      ("jj" "Journal" entry
+           (file+olp+datetree "~/iCloudDrive/iCloud~com~appsonthemove~beorg/org/Journal.org")
+           "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
+           ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
+           :clock-in :clock-resume
+           :empty-lines 1)) )
+
+(setq org-latex-compiler "xelatex")
+    (setq org-latex-pdf-process '("xelatex %f"))
+
+  (define-key global-map (kbd "C-c j")
+    (lambda () (interactive) (org-capture nil "jj")))
+
+ (define-key global-map (kbd "C-c t")
+    (lambda () (interactive) (org-capture nil "tt")))
+(use-package org-roam
+  :ensure t
+  :init
+  (setq org-roam-v2-ack t)
+  :custom
+  (org-roam-directory "~/iCloudDrive/iCloud~com~appsonthemove~beorg/org/Roam")
+  (org-roam-completion-everywhere t)
+  (org-roam-dailies-capture-templates
+      '(("d" "default" entry "* %<%I:%M %p>: %?"
+         :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n"))))
+  (org-roam-capture-templates
+   '(("d" "default" plain
+      "%?"
+      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+      :unnarrowed t)
+   ("c" "creator" plain
+     "* Projects  %?\n\n* References \n\n"
+      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+      :unnarrowed t)
+     ("i" "idea" plain
+     "[[id:06462BA2-502B-48CA-A1D4-A48D58B8E44D][Unlinked]]\n\n * Idea  %?\n\n* References \n\n"
+      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+      :unnarrowed t)))
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n i" . org-roam-node-insert)
+         :map org-mode-map
+         ("C-M-i" . completion-at-point))
+  :config
+  (org-roam-setup))
+
+(global-set-key (kbd "C-c l") 'org-store-link)
+
+
+(use-package org-bullets
+  :after org
+  :hook (org-mode . org-bullets-mode)
+  :custom
+  (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+
+;; Replace list hyphen with dot
+(font-lock-add-keywords 'org-mode
+                        '(("^ *\\([-]\\) "
+                           (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+
+
+  (setq org-tag-alist
+    '((:startgroup)
+       ; Put mutually exclusive tags here
+       (:endgroup)
+       ("Conversation" . ?c)
+       ("Meeting" . ?m)
+	("Pastoral Call" . ?p)))
+
+
+
+
+
+
+
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("afde6368be6868e8e3dd53fad1ac51223d5484f9e6836496e7987802c9a9663d"
+     default))
+ '(package-selected-packages
+   '(catppuccin-theme command-log-mode ivy magit obsidian org-bullets
+		      org-capture org-outlook org-present org-roam
+		      org-roam-ui pdf-tools poet-theme simple-httpd
+		      sqlite3 visual-fill-column websocket)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
