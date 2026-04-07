@@ -7,6 +7,8 @@
 
  (setq-default line-spacing 1)
 
+(use-package magit
+  :ensure t)
 
 (find-file "~/org")
 
@@ -99,9 +101,8 @@
 
 (setq org-capture-templates
     `(("t" "Tasks / Projects")
-      ("tt" "Task" entry (file+olp "~/TASKS.org" "Inbox")
+      ("tt" "Task" entry (file+olp "~/org/TASKS.org" "Inbox")
            "* TODO %?\n" :empty-lines 1)
-
       ("j" "Journal Entries")
       ("jj" "Journal" entry
            (file+olp+datetree "~/org/Journal.org")
