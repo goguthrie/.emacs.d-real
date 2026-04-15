@@ -5,11 +5,14 @@
  'nil
 )
 (setq url-cookie-secure-storage
- '(("outlook.office365.com"
+ '((".biblegateway.com"
+  [url-cookie "BGP_default_version" "NRSVUE"
+	      "Fri Apr 09 17:01:00 2027 GMT" "/" ".biblegateway.com" t])
+ ("outlook.office365.com"
+  [url-cookie "OIDC" "1" "Wed, 09-Sep-2026 01:55:36 GMT" "/"
+	      "outlook.office365.com" t]
   [url-cookie "ClientId" "882AF620A82941B7A59AC28E0007E941"
 	      "Tue, 09-Mar-2027 01:55:36 GMT" "/"
-	      "outlook.office365.com" t]
-  [url-cookie "OIDC" "1" "Wed, 09-Sep-2026 01:55:36 GMT" "/"
 	      "outlook.office365.com" t]))
 )
 
