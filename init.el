@@ -88,7 +88,8 @@
    "j" '((lambda () (interactive) (org-capture nil "jj")) :which-key "journal entry")
    "t" '((lambda () (interactive) (org-capture nil "tt")) :which-key "task")
    "e" '((lambda () (interactive) (org-capture nil "e"))  :which-key "energy log")
-   "p" '((lambda () (interactive) (org-capture nil "pp")) :which-key "pastoral care"))
+   "p" '((lambda () (interactive) (org-capture nil "pp")) :which-key "pastoral care")
+   "b" '((lambda () (interactive) (org-capture nil "bb")) :which-key "book recomendations"))
 
   (general-define-key
    :prefix "C-c n"
@@ -205,8 +206,11 @@
 
 (setq org-capture-templates
   `(("t" "Tasks / Projects")
-    ("tt" "Task" entry (file+olp ,(my/org "TASKS.org") "Inbox")
-         "* TODO %?\n" :empty-lines 1)
+    ("tt" "Task" entry (file+olp ,(my/org "RACC.org") "Tasks" "Inbox")
+     "* TODO %?\n" :empty-lines 1)
+    ("b" "book recomendations")
+    ("bb" "book recomendations" entry (file+olp ,(my/org "LIT.org") "Book recomendations")
+         "** %?" :empty-lines 0)
     ("j" "Journal Entries")
     ("jj" "Journal" entry
          (file+olp+datetree ,(my/org "Journal.org"))
@@ -386,6 +390,8 @@
 (run-with-idle-timer 5 nil #'my/outlook-sync)
 
 
+
+
 ;; ──────────────────────────────────────────────────────────────────────────────
 ;; Misc utilities
 ;; ──────────────────────────────────────────────────────────────────────────────
@@ -403,12 +409,15 @@
 ;; Open org directory on startup
 (find-file my/org-dir)
 
-
 ;; ──────────────────────────────────────────────────────────────────────────────
 ;; Custom (managed by Emacs — do not edit by hand)
 ;; ──────────────────────────────────────────────────────────────────────────────
 
 (custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    '("afde6368be6868e8e3dd53fad1ac51223d5484f9e6836496e7987802c9a9663d"
      default))
@@ -417,11 +426,18 @@
      "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/Tasks.org"
      "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/outlook-calendar.org"
      "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/Birthdays.org"
-     "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/Journal.org"))
+     "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/Journal.org"
+     "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/Life/Home.org"
+     "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/RACC.org"))
  '(package-selected-packages
    '(catppuccin-theme command-log-mode corfu embark embark-consult
-		      general magit marginalia modus-themes
+		      general magit marginalia modus-themes orderless
 		      org-bullets org-present org-roam org-roam-ui
-		      orderless pdf-tools simple-httpd sqlite3
-		      vertico visual-fill-column websocket which-key)))
-(custom-set-faces)
+		      pdf-tools simple-httpd sqlite3 vertico
+		      visual-fill-column websocket which-key wombag)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
