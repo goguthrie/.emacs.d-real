@@ -168,8 +168,7 @@
         org-habit-show-habits-only-for-today nil)
 
   ;; Refile
-  (setq org-refile-targets `((,(my/org "RACC.org") :maxlevel . 1)
-                              (,(my/org "TASKS.org")   :maxlevel . 1)))
+  (setq org-refile-targets `((,(my/org "RACC.org") :maxlevel . 1)))
   (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
   ;; Tags
@@ -198,6 +197,8 @@
 (font-lock-add-keywords 'org-mode
   '(("^ *\\([-]\\) "
      (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+
+(add-hook 'before-save-hook 'time-stamp)
 
 
 ;; ──────────────────────────────────────────────────────────────────────────────
@@ -407,7 +408,15 @@
            (concat (file-name-sans-extension (buffer-file-name)) ".org"))))
 
 ;; Open org directory on startup
-(find-file my/org-dir)
+(find-file (my/org "RACC.org"))
+
+(defun my/open-startup-screen ()
+  (interactive)
+  (if (fboundp 'dashboard-refresh-buffer) (dashboard-refresh-buffer)
+    (if (fboundp 'startify) (startify)
+      (switch-to-buffer (my/org "RACC.org")))))
+(global-set-key (kbd "C-c s") #'my/open-startup-screen)
+
 
 ;; ──────────────────────────────────────────────────────────────────────────────
 ;; Custom (managed by Emacs — do not edit by hand)
@@ -423,7 +432,6 @@
      default))
  '(org-agenda-files
    '("C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/habits.org"
-     "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/Tasks.org"
      "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/outlook-calendar.org"
      "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/Birthdays.org"
      "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/Journal.org"
