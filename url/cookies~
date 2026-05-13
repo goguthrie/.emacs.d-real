@@ -19,7 +19,7 @@
 	      "outlook.office365.com" t])
  (".biblegateway.com"
   [url-cookie "BGP_default_version" "NRSVUE"
-	      "Fri Apr 09 17:01:00 2027 GMT" "/" ".biblegateway.com" t]))
+	      "Wed Apr 28 15:40:11 2027 GMT" "/" ".biblegateway.com" t]))
 )
 
 ;; Local Variables:

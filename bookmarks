@@ -3,15 +3,15 @@
 ;;; nevertheless, you probably don't want to edit it.
 ;;; -*- End Of Bookmark File Format Version Stamp -*-
 (("org-refile-last-stored"
- (filename . "~/iCloudDrive/iCloud~com~appsonthemove~beorg/org/archive.org")
- (front-context-string . "** DONE Pastors ")
- (rear-context-string . "ne invited him.\n")
- (position . 4098)
- (last-modified 27054 61868 263933 0))
+ (filename . "~/iCloudDrive/iCloud~com~appsonthemove~beorg/org/RACC.org")
+ (front-context-string . "** Stewardship a")
+ (rear-context-string . "5-04 Mon 11:30>\n")
+ (position . 3864)
+ (last-modified 27130 33087 395683 0))
 ("org-capture-last-stored"
  (filename . "~/iCloudDrive/iCloud~com~appsonthemove~beorg/org/RACC.org")
- (front-context-string . "*** TODO Respond")
- (rear-context-string . " way I see it,\n\n")
- (position . 2053)
- (last-modified 27120 50207 114361 0))
+ (front-context-string . "*** DONE Convers")
+ (rear-context-string . "45>\n\n*** TODO \n\n")
+ (position . 1145)
+ (last-modified 27140 40552 964398 0))
 )

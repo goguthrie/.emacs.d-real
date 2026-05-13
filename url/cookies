@@ -13,7 +13,7 @@
 (setq url-cookie-secure-storage
  '((".biblegateway.com"
   [url-cookie "BGP_default_version" "NRSVUE"
-	      "Thu Apr 22 18:11:15 2027 GMT" "/" ".biblegateway.com" t])
+	      "Fri Apr 30 15:16:20 2027 GMT" "/" ".biblegateway.com" t])
  ("outlook.office365.com"
   [url-cookie "OIDC" "1" "Wed, 09-Sep-2026 01:55:36 GMT" "/"
 	      "outlook.office365.com" t]

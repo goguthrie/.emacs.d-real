@@ -10,6 +10,30 @@
   (expand-file-name path my/org-dir))
 
 
+;; _________________________________________________________________________
+;; Theme
+;;__________________________________________________________________________
+
+(use-package doom-themes
+  :ensure t
+  :custom
+  ;; Global settings (defaults)
+  (doom-themes-enable-bold t)   ; if nil, bold is universally disabled
+  (doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  ;; for treemacs users
+  (doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+  :config
+  (load-theme 'doom-one t)
+
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+  ;; Enable custom neotree theme (nerd-icons must be installed!)
+  (doom-themes-neotree-config)
+  ;; or for treemacs users
+  (doom-themes-treemacs-config)
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
+
 ;; ──────────────────────────────────────────────────────────────────────────────
 ;; Package system
 ;; ──────────────────────────────────────────────────────────────────────────────
@@ -88,7 +112,8 @@
    "j" '((lambda () (interactive) (org-capture nil "jj")) :which-key "journal entry")
    "t" '((lambda () (interactive) (org-capture nil "tt")) :which-key "task")
    "e" '((lambda () (interactive) (org-capture nil "e"))  :which-key "energy log")
-   "p" '((lambda () (interactive) (org-capture nil "pp")) :which-key "pastoral care"))
+   "p" '((lambda () (interactive) (org-capture nil "pp")) :which-key "pastoral care")
+   "b" '((lambda () (interactive) (org-capture nil "bb")) :which-key "book recomendations"))
 
   (general-define-key
    :prefix "C-c n"
@@ -167,8 +192,7 @@
         org-habit-show-habits-only-for-today nil)
 
   ;; Refile
-  (setq org-refile-targets `((,(my/org "RACC.org") :maxlevel . 1)
-                              (,(my/org "TASKS.org")   :maxlevel . 1)))
+  (setq org-refile-targets `((,(my/org "RACC.org") :maxlevel . 1)))
   (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
   ;; Tags
@@ -198,6 +222,8 @@
   '(("^ *\\([-]\\) "
      (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
 
+(add-hook 'before-save-hook 'time-stamp)
+
 
 ;; ──────────────────────────────────────────────────────────────────────────────
 ;; Org capture templates
@@ -205,8 +231,11 @@
 
 (setq org-capture-templates
   `(("t" "Tasks / Projects")
-    ("tt" "Task" entry (file+olp ,(my/org "TASKS.org") "Inbox")
-         "* TODO %?\n" :empty-lines 1)
+    ("tt" "Task" entry (file+olp ,(my/org "RACC.org") "Tasks" "Inbox")
+     "* TODO %?\n" :empty-lines 1)
+    ("b" "book recomendations")
+    ("bb" "book recomendations" entry (file+olp ,(my/org "LIT.org") "Book recomendations")
+         "** %?" :empty-lines 0)
     ("j" "Journal Entries")
     ("jj" "Journal" entry
          (file+olp+datetree ,(my/org "Journal.org"))
@@ -386,16 +415,7 @@
 (run-with-idle-timer 5 nil #'my/outlook-sync)
 
 
-;; ──────────────────────────────────────────────────────────────────────────────
-;; wombag
-;; ──────────────────────────────────────────────────────────────────────────────
-(use-package wombag
-  :config
-  (setq wombag-host "https://app.wallabag.it"
-        wombag-username "AndyGu"
-        wombag-password "T@Wcfn77Gy8Q%R"
-        wombag-client-id "40417_4c4ms0qyqhessswcg0cows4cogwo0o0kc4ggcww4kcwwscs0w4"
-        wombag-client-secret "69uj3ghhytssswwws4os8gswcoswow84oksswks8kcc8w8skc8"))
+
 
 ;; ──────────────────────────────────────────────────────────────────────────────
 ;; Misc utilities
@@ -412,7 +432,15 @@
            (concat (file-name-sans-extension (buffer-file-name)) ".org"))))
 
 ;; Open org directory on startup
-(find-file my/org-dir)
+(find-file (my/org "RACC.org"))
+
+(defun my/open-startup-screen ()
+  (interactive)
+  (if (fboundp 'dashboard-refresh-buffer) (dashboard-refresh-buffer)
+    (if (fboundp 'startify) (startify)
+      (switch-to-buffer (my/org "RACC.org")))))
+(global-set-key (kbd "C-c s") #'my/open-startup-screen)
+
 
 ;; ──────────────────────────────────────────────────────────────────────────────
 ;; Custom (managed by Emacs — do not edit by hand)
@@ -424,21 +452,28 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("afde6368be6868e8e3dd53fad1ac51223d5484f9e6836496e7987802c9a9663d"
+   '("aec7b55f2a13307a55517fdf08438863d694550565dee23181d2ebd973ebd6b8"
+     "4990532659bb6a285fee01ede3dfa1b1bdf302c5c3c8de9fad9b6bc63a9252f7"
+     "720838034f1dd3b3da66f6bd4d053ee67c93a747b219d1c546c41c4e425daf93"
+     "3613617b9953c22fe46ef2b593a2e5bc79ef3cc88770602e7e569bbd71de113b"
+     "a60b04e5c0fef30209f9576f04651938472b57cb1dae0375d80a53a78f515f69"
+     "0325a6b5eea7e5febae709dab35ec8648908af12cf2d2b569bedc8da0a3a81c1"
+     "afde6368be6868e8e3dd53fad1ac51223d5484f9e6836496e7987802c9a9663d"
      default))
  '(org-agenda-files
    '("C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/habits.org"
-     "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/Tasks.org"
      "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/outlook-calendar.org"
      "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/Birthdays.org"
      "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/Journal.org"
-     "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/Life/Home.org"))
+     "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/Life/Home.org"
+     "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/RACC.org"))
  '(package-selected-packages
-   '(catppuccin-theme command-log-mode corfu embark embark-consult
-		      general magit marginalia modus-themes orderless
-		      org-bullets org-present org-roam org-roam-ui
-		      pdf-tools simple-httpd sqlite3 vertico
-		      visual-fill-column websocket which-key wombag)))
+   '(catppuccin-theme command-log-mode corfu doom-themes embark
+		      embark-consult general magit marginalia
+		      modus-themes orderless org-bullets org-present
+		      org-roam org-roam-ui pdf-tools simple-httpd
+		      sqlite3 vertico visual-fill-column websocket
+		      which-key wombag)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
