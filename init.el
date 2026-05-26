@@ -487,9 +487,8 @@
      "afde6368be6868e8e3dd53fad1ac51223d5484f9e6836496e7987802c9a9663d"
      default))
  '(org-agenda-files
-   '("C:/Users/AndrewGuthrie/org/habits.org"
-     "C:/Users/AndrewGuthrie/org/outlook-calendar.org"
-     "C:/Users/AndrewGuthrie/org/Birthdays.org"
+   '("C:/Users/AndrewGuthrie/org/Life/habits.org"
+     "C:/Users/AndrewGuthrie/org/Life/Birthdays.org"
      "C:/Users/AndrewGuthrie/org/Journal.org"
      "C:/Users/AndrewGuthrie/org/Life/Home.org"
      "C:/Users/AndrewGuthrie/org/RACC.org"))

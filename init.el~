@@ -3,7 +3,7 @@
 ;; ──────────────────────────────────────────────────────────────────────────────
 
 (defvar my/org-dir
-  "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/")
+  "C:/Users/AndrewGuthrie/org/")
 
 (defun my/org (path)
   "Return absolute path to PATH inside my/org-dir."
@@ -201,16 +201,21 @@
           (:endgroup)
           ("Conversation"        . ?c)
           ("Meeting"             . ?m)
-          ("Pastoral-Visit"      . ?p)
+          ("RACC_Pastoral_Visit"      . ?p)
           ("ICARE"               . ?I)
-          ("Outreach_and_Action" . ?o)
+          ("RACC_Outreach_and_Action" . ?o)
           ("CEW"                 . ?C)
-          ("Board"               . ?b)
-          ("Stewardship_and_Finance" . ?f)
-          ("Worship"             . ?w)
+          ("RACC_Board"               . ?b)
+          ("RACC_Stewardship_and_Finance" . ?f)
+          ("RACC_Worship"             . ?w)
           ("DESC"                . ?D)
           ("Liturgy"             . ?l)
-          ("FLDOC"               . ?F))))
+          ("FLDOC"               . ?F)
+	  ("RACC_Newsletter"     . ?n)
+	  ("RACC_Tech"           . ?t)
+	  ("RACC_Thriving_Congregations_Cohort_2026"  . ?T)
+	  ("RACC_Personnel"      . ?P)
+	  ("RACC_Community_Member" . ?C))))
 
 (use-package org-bullets
   :after org
@@ -281,6 +286,10 @@
      ("c" "creator" plain "* Projects  %?\n\n* References \n\n"
       :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
                          "#+title: ${title}\n#+filetags: :Creator:\n")
+      :unnarrowed t)
+          ("l" "Lit" plain "* Projects  %?\n\n* References \n\n"
+      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+                         "#+title: ${title}\n#+filetags: :LIT:\n")
       :unnarrowed t)
      ("i" "idea" plain "* Idea  \n%?\n* References \n[[file:~/org/Roam/20260409095239-idea.org][Idea]]"
       :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
@@ -358,7 +367,9 @@
 (defvar my/outlook-ics-url
   "https://outlook.office365.com/owa/calendar/abaa183c61c3455c9220d50fcce590af@jaxdisciples.org/8b753f0a24274aa685aae43a940527969468786746798330342/calendar.ics")
 (defvar my/outlook-ics-file (my/org "outlook.ics"))
-(defvar my/outlook-org-file (my/org "outlook-calendar.org"))
+(defvar my/outlook-org-file (my/org "outlook-calendar.org")) ; kept but no longer written to
+(defvar my/racc-org-file    (my/org "RACC.org"))
+(defvar my/racc-calendar-heading "Calendar")
 
 (defun my/ics-to-org-timestamp (ics)
   (when (string-match
@@ -375,10 +386,11 @@
                                (string-to-number year))))
       (format-time-string "<%Y-%m-%d %a %H:%M>" time))))
 
-(defun my/org-existing-uids ()
+(defun my/racc-existing-uids ()
+  "Collect OUTLOOK_UIDs already present under the Calendar heading in RACC.org."
   (let ((uids (make-hash-table :test 'equal)))
-    (when (file-exists-p my/outlook-org-file)
-      (with-current-buffer (find-file-noselect my/outlook-org-file)
+    (when (file-exists-p my/racc-org-file)
+      (with-current-buffer (find-file-noselect my/racc-org-file)
         (org-map-entries
          (lambda ()
            (let ((uid (org-entry-get (point) "OUTLOOK_UID")))
@@ -386,13 +398,24 @@
          nil 'file)))
     uids))
 
+(defun my/racc-ensure-calendar-heading (buf)
+  "In BUF, move point to the end of the Calendar subtree, creating it if needed."
+  (with-current-buffer buf
+    (goto-char (point-min))
+    (unless (re-search-forward
+             (concat "^\\* " (regexp-quote my/racc-calendar-heading) "$") nil t)
+      (goto-char (point-max))
+      (unless (bolp) (insert "\n"))
+      (insert "* " my/racc-calendar-heading "\n"))
+    (org-end-of-subtree t t)))
+
 (defun my/outlook-download ()
   (url-copy-file my/outlook-ics-url my/outlook-ics-file t))
 
 (defun my/outlook-sync ()
   (interactive)
   (my/outlook-download)
-  (let ((existing (my/org-existing-uids)))
+  (let ((existing (my/racc-existing-uids)))    ; <-- now checks RACC.org
     (with-temp-buffer
       (insert-file-contents my/outlook-ics-file)
       (goto-char (point-min))
@@ -405,16 +428,16 @@
           (when (re-search-forward "DTSTART.*:\\([0-9T]+\\)" nil t)
             (setq dtstart (match-string 1)))
           (unless (gethash uid existing)
-            (let ((org-time (my/ics-to-org-timestamp dtstart)))
-              (with-current-buffer (find-file-noselect my/outlook-org-file)
-                (goto-char (point-max))
-                (insert (format "* %s\nSCHEDULED: %s\n:PROPERTIES:\n:OUTLOOK_UID: %s\n:END:\n\n"
-                                summary org-time uid))
-                (save-buffer)))))))))
+            (let ((org-time (my/ics-to-org-timestamp dtstart))
+                  (buf (find-file-noselect my/racc-org-file))) ; <-- RACC.org
+              (my/racc-ensure-calendar-heading buf)            ; <-- under Calendar
+              (with-current-buffer buf
+                (insert (format "** %s\nSCHEDULED: %s\n:PROPERTIES:\n:OUTLOOK_UID: %s\n:END:\n\n"
+                                summary org-time uid))        ; <-- ** not * (subheading)
+                (save-buffer))
+              (puthash uid t existing))))))))                  ; <-- prevent dupes in same run
 
 (run-with-idle-timer 5 nil #'my/outlook-sync)
-
-
 
 
 ;; ──────────────────────────────────────────────────────────────────────────────
@@ -441,6 +464,7 @@
       (switch-to-buffer (my/org "RACC.org")))))
 (global-set-key (kbd "C-c s") #'my/open-startup-screen)
 
+(setq org-log-done 'time)
 
 ;; ──────────────────────────────────────────────────────────────────────────────
 ;; Custom (managed by Emacs — do not edit by hand)
@@ -452,7 +476,9 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("aec7b55f2a13307a55517fdf08438863d694550565dee23181d2ebd973ebd6b8"
+   '("9e5e0ff3a81344c9b1e6bfc9b3dcf9b96d5ec6a60d8de6d4c762ee9e2121dfb2"
+     "adb2c32015c42ac06e4cadc87796c6255d7f7d107a2a5f9650672fe90fedd244"
+     "aec7b55f2a13307a55517fdf08438863d694550565dee23181d2ebd973ebd6b8"
      "4990532659bb6a285fee01ede3dfa1b1bdf302c5c3c8de9fad9b6bc63a9252f7"
      "720838034f1dd3b3da66f6bd4d053ee67c93a747b219d1c546c41c4e425daf93"
      "3613617b9953c22fe46ef2b593a2e5bc79ef3cc88770602e7e569bbd71de113b"
@@ -461,19 +487,19 @@
      "afde6368be6868e8e3dd53fad1ac51223d5484f9e6836496e7987802c9a9663d"
      default))
  '(org-agenda-files
-   '("C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/habits.org"
-     "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/outlook-calendar.org"
-     "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/Birthdays.org"
-     "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/Journal.org"
-     "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/Life/Home.org"
-     "C:/Users/AndrewGuthrie/iCloudDrive/iCloud~com~appsonthemove~beorg/org/RACC.org"))
+   '("C:/Users/AndrewGuthrie/org/Life/habits.org"
+     "C:/Users/AndrewGuthrie/org/outlook-calendar.org"
+     "C:/Users/AndrewGuthrie/org/Life/Birthdays.org"
+     "C:/Users/AndrewGuthrie/org/Journal.org"
+     "C:/Users/AndrewGuthrie/org/Life/Home.org"
+     "C:/Users/AndrewGuthrie/org/RACC.org"))
  '(package-selected-packages
    '(catppuccin-theme command-log-mode corfu doom-themes embark
 		      embark-consult general magit marginalia
-		      modus-themes orderless org-bullets org-present
-		      org-roam org-roam-ui pdf-tools simple-httpd
-		      sqlite3 vertico visual-fill-column websocket
-		      which-key wombag)))
+		      modus-themes orderless org-bullets
+		      org-habit-stats org-present org-roam org-roam-ui
+		      pdf-tools simple-httpd sqlite3 vertico
+		      visual-fill-column websocket which-key wombag)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
